@@ -1,0 +1,6 @@
+CREATE EXTENSION IF NOT EXISTS pgcrypto;
+CREATE TABLE IF NOT EXISTS users(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),email VARCHAR(255) UNIQUE NOT NULL,password_hash VARCHAR(255) NOT NULL,role VARCHAR(20) NOT NULL CHECK(role IN ('TENANT','LANDLORD')),created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS properties(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),landlord_id UUID NOT NULL REFERENCES users(id),address TEXT NOT NULL,created_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE TABLE IF NOT EXISTS inspections(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),property_id UUID NOT NULL REFERENCES properties(id),tenant_id UUID REFERENCES users(id),status VARCHAR(20) NOT NULL DEFAULT 'DRAFT' CHECK(status IN ('DRAFT','LOCKED')),final_hash CHAR(64),landlord_signature TEXT,tenant_signature TEXT,created_at TIMESTAMPTZ NOT NULL DEFAULT now(),locked_at TIMESTAMPTZ);
+CREATE TABLE IF NOT EXISTS photos(id UUID PRIMARY KEY DEFAULT gen_random_uuid(),inspection_id UUID NOT NULL REFERENCES inspections(id) ON DELETE CASCADE,room_name VARCHAR(120) NOT NULL,s3_url TEXT NOT NULL,sha256 CHAR(64) NOT NULL,notes TEXT,device_orientation VARCHAR(40),captured_at TIMESTAMPTZ NOT NULL DEFAULT now());
+CREATE INDEX IF NOT EXISTS idx_photos_inspection ON photos(inspection_id); CREATE INDEX IF NOT EXISTS idx_inspections_property ON inspections(property_id);

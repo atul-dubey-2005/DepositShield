@@ -1,0 +1,2 @@
+require('dotenv').config(); const {Pool}=require('pg'); const bcrypt=require('bcryptjs'); const jwt=require('jsonwebtoken'); const {createApp}=require('./app');
+const pool=new Pool({connectionString:process.env.DATABASE_URL||'postgresql://admin:password123@localhost:5432/depositshield'}); const app=createApp({pool,jwt,bcrypt,jwtSecret:process.env.JWT_SECRET||'dev-secret-change-me'}); const port=process.env.PORT||5000; app.listen(port,()=>console.log(`DepositShield API running on ${port}`));
